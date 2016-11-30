@@ -1,12 +1,16 @@
 module VmOrTemplate::Operations::Snapshot
-  def validate_create_snapshot
-    return {:available => false, :message => "Create Snapshot operation not supported for #{self.class.model_suffix} VM"} unless self.supports_snapshots?
-    unless supports_control?
-      return {:available => false, :message => unsupported_reason(:control)}
+  extend ActiveSupport::Concern
+
+  included do
+    supports :create_snapshot do
+      unless supports_snapshots?
+        unsupported_reason_add(:create_snapshot, _("Create Snapshot operation not supported for VM"))
+      end
+
+      unless supports_control?
+        unsupported_reason_add(:create_snapshot, unsupported_reason(:control))
+      end
     end
-    msg = {:available => true, :message => nil}
-    msg[:message] = 'At least one snapshot has to be active to create a new snapshot for this VM' if !snapshots.blank? && snapshots.first.get_current_snapshot.nil?
-    msg
   end
 
   def validate_remove_snapshot(task = 'Remove')

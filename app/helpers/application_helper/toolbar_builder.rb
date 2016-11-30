@@ -903,10 +903,10 @@ class ApplicationHelper::ToolbarBuilder
         end
       when "vm_snapshot_add"
         if @record.number_of(:snapshots) <= 0
-          return @record.is_available_now_error_message(:create_snapshot) unless @record.is_available?(:create_snapshot)
+          return @record.unsupported_message(:create_snapshot) unless @record.supports_create_snapshot?
         else
-          unless @record.is_available?(:create_snapshot)
-            return @record.is_available_now_error_message(:create_snapshot)
+          unless @record.supports_create_snapshot?
+            return @record.unsupported_reason(:create_snapshot)
           else
             return N_("Select the Active snapshot to create a new snapshot for this VM") unless @active
           end
